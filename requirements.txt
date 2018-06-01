@@ -1,0 +1,13 @@
+gunicorn
+gevent
+flask
+flask_script
+flask-cors
+flasgger
+peewee
+pymysql
+itsdangerous
+PyJWT
+requests
+pymongo
+mongoengine

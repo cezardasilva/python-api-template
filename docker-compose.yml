@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  api-container:
+    build: .
+    container_name: api-container
+    image: api-pack
+    volumes:
+      - .:/usr/src/app
+    expose:
+      - "5000"
+    depends_on:
+      - mysql
+      - nosql
+    links:
+      - mysql:db
+      - nosql:nosql
+    env_file: .env
+    command: gunicorn --reload -b 0.0.0.0:5000 -k gevent --log-file - --log-level debug --access-logfile - manage:app
+
+  mysql:
+    container_name: mysql
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: "dev"
+    ports:
+      - "3307:3306"
+
+  nosql:
+    container_name: nosql
+    image: mongo:latest
+    environment:
+      MONGO_DATA_DIR: "/data/db"
+      MONGO_LOG_DIR: "/dev/null"
+    ports:
+      - "27017:27017"
+
+  server-nginx:
+    container_name: server-nginx
+    build: ./nginx/
+    restart: always
+    ports:
+      - 8000:80
+      - 8001:443
+    depends_on:
+      - api-container
+    links:
+      - api-container
